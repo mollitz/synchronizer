@@ -1,0 +1,21 @@
+all: library demo
+
+CFLAGS = -Wall -g  -I/usr/include/qwt
+LDFLAGS = -lm -lfftw3 -lportaudio
+QTFLAGS = -I/usr/include/qt4 -I/usr/include/qt4/Qt -I/usr/include/qt4/QtGui -I/usr/include/qt4/QtCore
+QTLINK =  -lQtCore -lQtGui -lqwt
+CC = /usr/bin/gcc $(CFLAGS)
+LD = /usr/bin/ld $(LDFLAGS)
+
+
+
+demo: library demo.cpp
+	g++ -o demo $(CFLAGS) $(QTFLAGS) demo.cpp synchronizer.o $(LDFLAGS)  $(QTLINK)
+test: synchronizertest.cpp library
+	g++ -o test $(CFLAGS) $(QTFLAGS) synchronizertest.cpp synchronizer.o $(LDFLAGS) $(QTLINK)
+
+library: synchronizer.cpp synchronizer.h
+	g++ -c synchronizer.cpp
+
+clean:
+	rm *.o
