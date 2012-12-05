@@ -1,3 +1,4 @@
+#include <fftw3.h>
 #include <QApplication>
 #include "demo.h"
 

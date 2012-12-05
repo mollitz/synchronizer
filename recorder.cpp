@@ -1,7 +1,7 @@
 #include "recorder.h"
 #include <QDebug>
 
-Recorder::Recorder(int sampleRate, int framesPerBuffer, int numChannels, QObject *parent) : QObject(parent) {
+Recorder::Recorder(int sampleRate, int framesPerBuffer, int numChannels, QObject *parent) : QObject(parent) { 
     PaError err = paNoError;
     
     //Init Buffer. 
@@ -18,7 +18,7 @@ Recorder::Recorder(int sampleRate, int framesPerBuffer, int numChannels, QObject
             sampleRate,
             framesPerBuffer,
             inputStreamCallback,
-            this);
+            (void*)this);
 
     if(err != paNoError) {
         qDebug() << "Couldnt init stream";
@@ -28,21 +28,21 @@ Recorder::Recorder(int sampleRate, int framesPerBuffer, int numChannels, QObject
         qDebug() << "Couldnt start stream";
     }
 }
-~Recorder::Recorder() {
+Recorder::~Recorder() {
     Pa_StopStream(stream);
 }
 
-static int inputStreamCallback( const void *input, 
+int Recorder::inputStreamCallback( const void *input, 
                       void *output, 
                       unsigned long frameCount, 
                       const PaStreamCallbackTimeInfo* timeInfo,
                       PaStreamCallbackFlags statusFlags,
                       void *recorderObject) {
-    Recorder *ro = (RecorderObject *)recorderObject;
-    ro->emitDataAvailable((unsigned byte*)input);
+    Recorder *ro = (Recorder*)recorderObject;
+    ro->emitDataAvailable((unsigned char*)input);
     return paContinue;
 }
 
-void Recorder::emitDataAvailable(unsigned byte* buffer) {
+void Recorder::emitDataAvailable(unsigned char* buffer) {
     emit dataAvailable(buffer);
 }

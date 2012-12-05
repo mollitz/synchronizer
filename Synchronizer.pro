@@ -9,8 +9,8 @@ INCLUDEPATH += . /usr/include/qwt
 CONFIG += debug
 
 # Input
-HEADERS += synchronizer.h demo.h mp3decoder.h
-SOURCES += main.cpp demo.cpp synchronizer.cpp mp3decoder.cpp
+HEADERS += synchronizer.h demo.h mp3decoder.h recorder.h
+SOURCES += main.cpp demo.cpp synchronizer.cpp mp3decoder.cpp recorder.cpp
 
 LIBS += -lqwt -lportaudio -lfftw3
 

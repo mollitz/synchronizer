@@ -14,7 +14,7 @@ class Recorder : public QObject{
     public:
         Recorder(int sampleRate, int framesPerBuffer, int numChannels = 1, QObject *parent = 0);
         ~Recorder();
-        static void inputStreamCallback(const void *input, 
+        static int inputStreamCallback(const void *input, 
                       void *output, 
                       unsigned long frameCount, 
                       const PaStreamCallbackTimeInfo* timeInfo,
@@ -24,6 +24,6 @@ class Recorder : public QObject{
 
     signals:
         void dataAvailable(unsigned char *);
-}
+};
 
 #endif

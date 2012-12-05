@@ -13,6 +13,7 @@ typedef struct Ringbuffer{
         this->bytesPerBuffer = bytesPerBuffer;
         this->buffer = (unsigned char*)calloc(elements, bytesPerBuffer);
         aware = false;
+        putI = getI = 0;
     }
     /**
       * Writes bytesPerBuffer bytes into the buffer

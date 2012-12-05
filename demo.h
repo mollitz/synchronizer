@@ -7,6 +7,7 @@
 #include <qwt_symbol.h>
 #include "recorder.h"
 #include "synchronizer.h"
+#include "ringbuffer.h"
 
 
 class MainWidget : public QwtPlot {

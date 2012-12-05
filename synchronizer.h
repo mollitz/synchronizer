@@ -1,5 +1,7 @@
+
 #ifndef SYNCHRONIZER_H
 #define SYNCHRONIZER_H
+
 #include <fftw3.h>
 /**
   * Author license data blablabla
