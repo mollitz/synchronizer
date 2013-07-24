@@ -110,5 +110,4 @@ int main(int argc, char *argv[]) {
     plot.show();
 
     return a.exec();
-    return 0;
 }
