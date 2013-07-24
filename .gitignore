@@ -1,3 +1,5 @@
 *.o
 .fuse*
 moc_*
+Makefile
+Synchronizer

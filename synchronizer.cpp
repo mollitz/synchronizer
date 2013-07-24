@@ -15,11 +15,11 @@ Fingerprint *initFingerprint(FingerprintConfiguration configuration) {
     fingerprint->in = (double*)fftw_alloc_real(configuration.fftPoints);
     fingerprint->out = (fftw_complex*)fftw_alloc_complex(configuration.fftPoints/2 +1);
     fingerprint->plan = fftw_plan_dft_r2c_1d(configuration.fftPoints, fingerprint->in, fingerprint->out, FFTW_ESTIMATE);
-    return fingerprint; 
+    return fingerprint;
 }
 
 /**
-  * Helper function to calculate absolute value 
+  * Helper function to calculate absolute value
   */
 /*double abs(fftw_complex in) {
     return sqrt(in[0]*in[0]+in[1]*in[1]);
