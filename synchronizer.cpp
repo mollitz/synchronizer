@@ -54,8 +54,8 @@ void processSamples(unsigned char *buffer, Fingerprint *fingerprint) {
     //Load values and apply Hann-Windows
     //fingerprint->in[0] = 0.5*(1+cos((2.0/(configuration.fftPoints-1))))*M_PI*((double)((short*)buffer)[0]);
     for(i=0; i<configuration.fftPoints; i++) {
-        //fingerprint->in[i] = 0.5*(1-cos((2.0/(configuration.fftPoints-1))))*M_PI*((double)((short*)buffer)[i]);
-        fingerprint->in[i] = (double)((short*)buffer)[i];
+        fingerprint->in[i] = 0.5*(1-cos((2.0/(configuration.fftPoints-1))))*M_PI*((double)((short*)buffer)[i]);
+        //fingerprint->in[i] = (double)((short*)buffer)[i]; //without windowing..
     }
 
     //Calculate FFT
@@ -84,7 +84,10 @@ void processSamples(unsigned char *buffer, Fingerprint *fingerprint) {
 
 int calculateDifference(Fingerprint *original, Fingerprint *sync) {
     //No-one will understand this ever ever.. :D
+    //I will!
     // TODO Check their configurations to see if they are equal or simliar and maybe convert something?
+
+    //First change keys with values: freqs is an array with indexes as freqs and values as arrays holding the time where it occured
     Peaks *freqs = (Peaks *)calloc(original->configuration.fftPoints/2+1, sizeof(Peaks));
     int i;
     for(i=0; i<original->numPeaks; i++) {
@@ -104,17 +107,23 @@ int calculateDifference(Fingerprint *original, Fingerprint *sync) {
     }
     const int diffCount = 1000;
     int *differences = (int*)calloc(2*diffCount, sizeof(int)); //use as this differences[1000][2] [i][0] is difference [i][1] is count
+    //go through each data set of synced track
     for(i=0; i<sync->numPeaks; i++) {
         int j;
+
+        //go through each detected peak frequency in current data set
         for(j=0; j<sync->peaks[i].numPeaks; j++) {
             int freq = sync->peaks[i].peaks[j];
             int k;
+            //find all occurencies of this frequncy in the original sound track
             for(k=0; k<freqs[freq].numPeaks; k++) {
+                //calculate the time difference of original frequency occurency and current data set of synced track
                 int dif = freqs[freq].peaks[k]-i;
                 //add differnce to differnces
                 if(dif == 0) //we need 0 to know if field is used or not... anyway it would be unusual to sync to perfect synced sounds...
                     continue;
                 int c;
+                //find free field to store new frequency match with diff-saved or increment already found difference
                 for(c=0; c<diffCount; c++) {
                     if(differences[2*c] ==  dif) {
                         differences[2*c+1]++;

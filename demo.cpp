@@ -46,8 +46,8 @@ MainWidget::MainWidget(QWidget *parent) :
 {
     FingerprintConfiguration configuration; configuration.maxNumberPeaks = 4; configuration.fftPoints = framesPerBuffer; configuration.sampleBytes = sampleBytes;
 
-    setAxisScale(yLeft, 0, 100000);
-    setAxisScale(yRight, 0, 100000);
+    setAxisScale(yLeft, 0, 1);
+    setAxisScale(yRight, 0, 1);
     curve = new QwtPlotCurve();
     curve->attach(this);
     markers = (QwtPlotMarker**)malloc(configuration.maxNumberPeaks*sizeof(QwtPlotMarker*));
