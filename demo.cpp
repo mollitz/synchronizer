@@ -14,7 +14,6 @@
 #include <QApplication>
 #include <QTimer>
 #include <QtGui>
-#include <sys/time.h>
 
 
 MainWidget::~MainWidget() {
@@ -24,11 +23,7 @@ MainWidget::~MainWidget() {
     freeFingerprint(fingerprint);
 }
 void MainWidget::processData() {
-    static struct timeval lastTime;
-    struct timeval currentTime;
     while(ringbuffer.getElement(buffer)) {
-        gettimeofday(&currentTime, NULL);
-        qDebug() << currentTime.tv_usec - lastTime.tv_usec;
         qDebug() << "got data";
         processSamples(buffer, fingerprint);
         for(int j=0; j<257; j++) {
@@ -43,13 +38,13 @@ void MainWidget::processData() {
             replot();
         }
         qDebug() << "displaying";
-        gettimeofday(&lastTime, NULL);
     }
 
 }
 MainWidget::MainWidget(QWidget *parent) :
     QwtPlot(parent),
-    recorder(sampleRate, framesPerBuffer, 1, this)
+    recorder(sampleRate, framesPerBuffer, 1, this),
+    mp3Decoder(filename, this)
 {
     FingerprintConfiguration configuration; configuration.maxNumberPeaks = 4; configuration.fftPoints = framesPerBuffer; configuration.sampleBytes = sampleBytes;
 
@@ -66,7 +61,9 @@ MainWidget::MainWidget(QWidget *parent) :
     }
 
     connect(&recorder, SIGNAL(dataAvailable(unsigned char*)), this, SLOT(receiveData(unsigned char*)));
-    //QTimer *mediaFileTimer = new QTimer(this);
+    QTimer *mediaFileTimer = new QTimer(this);
+    connect(mediaFileTimer, SIGNAL(timeout()), this, SLOT(getDataFromMediaFile()));
+    mediaFileTimer->start(8);
 
 
     buffer = (unsigned char*)malloc(framesPerBuffer*sampleBytes);
@@ -83,5 +80,8 @@ void MainWidget::receiveData(unsigned char *buffer) {
 }
 
 void MainWidget::getDataFromMediaFile() {
-
+    qDebug() << "read Bytes: " << mp3Decoder.getMonoFrames(framesPerBuffer, buffer);
+    if(!ringbuffer.addElement(buffer)) {
+        qDebug() << "dumping input due to full buffer";
+    }
 }
