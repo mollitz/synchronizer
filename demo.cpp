@@ -14,35 +14,42 @@
 #include <QApplication>
 #include <QTimer>
 #include <QtGui>
+#include <sys/time.h>
 
 
 MainWidget::~MainWidget() {
-            //delete markers
-            free(buffer);
-            free(ringbuffer.buffer);
-            freeFingerprint(fingerprint);
+    //delete markers
+    free(buffer);
+    free(ringbuffer.buffer);
+    freeFingerprint(fingerprint);
 }
 void MainWidget::processData() {
-            while(ringbuffer.getElement(buffer)) {
-                qDebug() << "got data";
-                processSamples(buffer, fingerprint);
-                for(int j=0; j<257; j++) {
-                    x[j] = j;
-                    y[j] = sqrt(pow(fingerprint->out[j][0],2)+pow(fingerprint->out[j][1],2));
-                    curve->setRawSamples(x,y,257);
-                    Peaks peaks = fingerprint->peaks[fingerprint->numPeaks-1];
-                    for(int i=0; i<peaks.numPeaks; i++) {
-                        int xVal = peaks.peaks[i];
-                        markers[i]->setValue(xVal, y[xVal]);
-                    }
-                    replot();
-                }
-                qDebug() << "displaying";
+    static struct timeval lastTime;
+    struct timeval currentTime;
+    while(ringbuffer.getElement(buffer)) {
+        gettimeofday(&currentTime, NULL);
+        qDebug() << currentTime.tv_usec - lastTime.tv_usec;
+        qDebug() << "got data";
+        processSamples(buffer, fingerprint);
+        for(int j=0; j<257; j++) {
+            x[j] = j;
+            y[j] = sqrt(pow(fingerprint->out[j][0],2)+pow(fingerprint->out[j][1],2));
+            curve->setRawSamples(x,y,257);
+            Peaks peaks = fingerprint->peaks[fingerprint->numPeaks-1];
+            for(int i=0; i<peaks.numPeaks; i++) {
+                int xVal = peaks.peaks[i];
+                markers[i]->setValue(xVal, y[xVal]);
             }
+            replot();
         }
+        qDebug() << "displaying";
+        gettimeofday(&lastTime, NULL);
+    }
+
+}
 MainWidget::MainWidget(QWidget *parent) :
-            QwtPlot(parent),
-            recorder(sampleRate, framesPerBuffer, 1, this)
+    QwtPlot(parent),
+    recorder(sampleRate, framesPerBuffer, 1, this)
 {
     FingerprintConfiguration configuration; configuration.maxNumberPeaks = 4; configuration.fftPoints = framesPerBuffer; configuration.sampleBytes = sampleBytes;
 
@@ -57,7 +64,9 @@ MainWidget::MainWidget(QWidget *parent) :
         markers[i]->setSymbol(sym);
         markers[i]->attach(this);
     }
+
     connect(&recorder, SIGNAL(dataAvailable(unsigned char*)), this, SLOT(receiveData(unsigned char*)));
+    //QTimer *mediaFileTimer = new QTimer(this);
 
 
     buffer = (unsigned char*)malloc(framesPerBuffer*sampleBytes);
@@ -73,3 +82,6 @@ void MainWidget::receiveData(unsigned char *buffer) {
     }
 }
 
+void MainWidget::getDataFromMediaFile() {
+
+}

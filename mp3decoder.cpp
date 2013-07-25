@@ -1,5 +1,6 @@
 #include "mp3decoder.h"
 
+
 Mp3Decoder::Mp3Decoder(const char *filename, QObject *parent) : QObject(parent) {
     sfFile = sf_open(filename, SFM_READ, &sfInfo);
     //now read file info from sfInfo
@@ -13,10 +14,10 @@ void Mp3Decoder::close() {
     sf_close(sfFile);
     sfFile = NULL;
 }
-int getMonoFrames(int numFrames, void *buffer) {
+int Mp3Decoder::getMonoFrames(int numFrames, void *buffer) {
     void *tmpBuffer = malloc(2*numFrames*2);
-    int readFrames = sf_readf_short(sfFile, tmpBuffer, numFrames);
-    for(inf i=0; i<readFrames;i++) {
+    int readFrames = sf_readf_short(sfFile, (short*)tmpBuffer, numFrames);
+    for(int i=0; i<readFrames;i++) {
         memcpy(buffer+2*i, tmpBuffer+4*i, 2);
     }
     return readFrames;

@@ -28,9 +28,10 @@ class MainWidget : public QwtPlot {
 
     public:
         ~MainWidget();
-    public slots: 
+    public slots:
         void processData();
         void receiveData(unsigned char*);
+        void getDataFromMediaFile();
     public:
         MainWidget(QWidget *parent = 0);
 };
