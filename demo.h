@@ -6,6 +6,7 @@
 #include <qwt_plot_marker.h>
 #include <qwt_plot_marker.h>
 
+
 #include <qwt_symbol.h>
 #include "recorder.h"
 #include "synchronizer.h"
@@ -18,16 +19,19 @@ class MainWidget : public QwtPlot {
     private:
         const char *filename = "/data/Musik/Alben/Brandon Flowers/Flamingo/08 - Crossfire.ogg";
         const int sampleRate = 44100;
-        static const int framesPerBuffer = 2048; //Equals to fftPoints
+        static const int framesPerBuffer = 4096; //Equals to fftPoints
         const int sampleBytes = 2;
         double x[framesPerBuffer/2+1], y[framesPerBuffer/2+1];
         unsigned char *buffer;
-        Fingerprint *fingerprint;
+        FingerprintConfiguration configuration;
+        Fingerprint *syncFingerprint, *originalFingerprint;
         Ringbuffer ringbuffer = Ringbuffer(10, framesPerBuffer*sampleBytes);
         Recorder recorder;
         Mp3Decoder mp3Decoder;
         QwtPlotCurve *curve;
         QwtPlotMarker **markers;
+    protected:
+        virtual void keyPressEvent(QKeyEvent *keyEvent);
 
     public:
         ~MainWidget();

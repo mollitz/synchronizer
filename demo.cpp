@@ -20,23 +20,25 @@ MainWidget::~MainWidget() {
     //delete markers
     free(buffer);
     free(ringbuffer.buffer);
-    freeFingerprint(fingerprint);
+    if(syncFingerprint)
+        freeFingerprint(syncFingerprint);
+    freeFingerprint(originalFingerprint);
 }
 void MainWidget::processData() {
     while(ringbuffer.getElement(buffer)) {
         qDebug() << "got data";
-        processSamples(buffer, fingerprint);
+        processSamples(buffer, syncFingerprint);
         for(int j=0; j<framesPerBuffer/2+1; j++) {
             x[j] = j;
-            y[j] = sqrt(pow(fingerprint->out[j][0],2)+pow(fingerprint->out[j][1],2));
+            y[j] = sqrt(pow(syncFingerprint->out[j][0],2)+pow(syncFingerprint->out[j][1],2));
             curve->setRawSamples(x,y,framesPerBuffer/2+1);
-            Peaks peaks = fingerprint->peaks[fingerprint->numPeaks-1];
+            Peaks peaks = syncFingerprint->peaks[syncFingerprint->numPeaks-1];
             for(int i=0; i<peaks.numPeaks; i++) {
                 int xVal = peaks.peaks[i];
                 markers[i]->setValue(xVal, y[xVal]);
             }
-            replot();
         }
+        replot();
         qDebug() << "displaying";
     }
 
@@ -46,7 +48,8 @@ MainWidget::MainWidget(QWidget *parent) :
     recorder(sampleRate, framesPerBuffer, 1, this),
     mp3Decoder(filename, this)
 {
-    FingerprintConfiguration configuration; configuration.maxNumberPeaks = 4; configuration.fftPoints = framesPerBuffer; configuration.sampleBytes = sampleBytes;
+
+     configuration.maxNumberPeaks = 4; configuration.fftPoints = framesPerBuffer; configuration.sampleBytes = sampleBytes;
 
     setAxisScale(yLeft, 0, 1);
     setAxisScale(yRight, 0, 1);
@@ -57,20 +60,37 @@ MainWidget::MainWidget(QWidget *parent) :
         QwtSymbol *sym = new QwtSymbol(QwtSymbol::Diamond,QBrush(Qt::red),QPen(Qt::red),QSize(5,5));
         markers[i] = new QwtPlotMarker();
         markers[i]->setSymbol(sym);
+
+
         markers[i]->attach(this);
     }
 
-    //connect(&recorder, SIGNAL(dataAvailable(unsigned char*)), this, SLOT(receiveData(unsigned char*)));
-    QTimer *mediaFileTimer = new QTimer(this);
-    connect(mediaFileTimer, SIGNAL(timeout()), this, SLOT(getDataFromMediaFile()));
-    mediaFileTimer->start(50);
-
-
     buffer = (unsigned char*)malloc(framesPerBuffer*sampleBytes);
-    fingerprint = initFingerprint(configuration);
-    QTimer *timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(processData()));
-    timer->start(1);
+    originalFingerprint = initFingerprint(configuration);
+
+    while(mp3Decoder.getMonoFrames(framesPerBuffer, buffer) == framesPerBuffer) {
+        processSamples(buffer, originalFingerprint);
+    }
+    qDebug() << "parsed originalFingerprint. go for mic now";
+
+}
+
+void MainWidget::keyPressEvent(QKeyEvent *keyEvent) {
+    if(keyEvent->key() == Qt::Key_E) {
+        disconnect(&recorder, SIGNAL(dataAvailable(unsigned char*)), this, SLOT(receiveData(unsigned char*)));
+        qDebug() << "startdiff";
+        qDebug() << calculateDifference(originalFingerprint, syncFingerprint);
+        qDebug() << "enddiff";
+        freeFingerprint(syncFingerprint);
+        syncFingerprint = NULL;
+    }
+    if(keyEvent->key() == Qt::Key_S) {
+        syncFingerprint = initFingerprint(configuration);
+        connect(&recorder, SIGNAL(dataAvailable(unsigned char*)), this, SLOT(receiveData(unsigned char*)));
+        QTimer *syncTimer = new QTimer(this);
+        connect(syncTimer, SIGNAL(timeout()), this, SLOT(processData()));
+        syncTimer->start(1);
+    }
 }
 
 void MainWidget::receiveData(unsigned char *buffer) {
