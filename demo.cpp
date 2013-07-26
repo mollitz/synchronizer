@@ -26,10 +26,10 @@ void MainWidget::processData() {
     while(ringbuffer.getElement(buffer)) {
         qDebug() << "got data";
         processSamples(buffer, fingerprint);
-        for(int j=0; j<257; j++) {
+        for(int j=0; j<framesPerBuffer/2+1; j++) {
             x[j] = j;
             y[j] = sqrt(pow(fingerprint->out[j][0],2)+pow(fingerprint->out[j][1],2));
-            curve->setRawSamples(x,y,257);
+            curve->setRawSamples(x,y,framesPerBuffer/2+1);
             Peaks peaks = fingerprint->peaks[fingerprint->numPeaks-1];
             for(int i=0; i<peaks.numPeaks; i++) {
                 int xVal = peaks.peaks[i];
@@ -60,10 +60,10 @@ MainWidget::MainWidget(QWidget *parent) :
         markers[i]->attach(this);
     }
 
-    connect(&recorder, SIGNAL(dataAvailable(unsigned char*)), this, SLOT(receiveData(unsigned char*)));
+    //connect(&recorder, SIGNAL(dataAvailable(unsigned char*)), this, SLOT(receiveData(unsigned char*)));
     QTimer *mediaFileTimer = new QTimer(this);
     connect(mediaFileTimer, SIGNAL(timeout()), this, SLOT(getDataFromMediaFile()));
-    mediaFileTimer->start(8);
+    mediaFileTimer->start(50);
 
 
     buffer = (unsigned char*)malloc(framesPerBuffer*sampleBytes);

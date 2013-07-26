@@ -7,7 +7,6 @@
 class Mp3Decoder : public QObject {
     Q_OBJECT
     private:
-        const char *filename = "/home/mollitz/Musik/Lieder/Blumentopf - Da draussen (feat. Roger Reckless).mp3";
         SF_INFO sfInfo;
         SNDFILE *sfFile;
 

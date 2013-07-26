@@ -17,10 +17,10 @@ class MainWidget : public QwtPlot {
     Q_OBJECT
     private:
         const char *filename = "/data/Musik/Alben/Brandon Flowers/Flamingo/08 - Crossfire.ogg";
-        const int sampleRate = 16000;
-        const int framesPerBuffer = 512; //Equals to fftPoints
+        const int sampleRate = 44100;
+        static const int framesPerBuffer = 2048; //Equals to fftPoints
         const int sampleBytes = 2;
-        double x[257], y[257];
+        double x[framesPerBuffer/2+1], y[framesPerBuffer/2+1];
         unsigned char *buffer;
         Fingerprint *fingerprint;
         Ringbuffer ringbuffer = Ringbuffer(10, framesPerBuffer*sampleBytes);
