@@ -82,11 +82,10 @@ void processSamples(unsigned char *buffer, Fingerprint *fingerprint) {
     fingerprint->peaks[fingerprint->numPeaks-1].numPeaks = configuration.maxNumberPeaks;
 }
 
-int calculateDifference(Fingerprint *original, Fingerprint *sync) {
-    //No-one will understand this ever ever.. :D
-    //I will!
-    // TODO Check their configurations to see if they are equal or simliar and maybe convert something?
-
+/**
+ * Helper function
+ */
+Peaks *calculateFrequencies(Fingerprint *original) {
     //First change keys with values: freqs is an array with indexes as freqs and values as arrays holding the time where it occured
     Peaks *freqs = (Peaks *)calloc(original->configuration.fftPoints/2+1, sizeof(Peaks));
     int i;
@@ -105,9 +104,13 @@ int calculateDifference(Fingerprint *original, Fingerprint *sync) {
             freqs[freq].peaks[freqs[freq].numPeaks-1] = i;
         }
     }
-    const int diffCount = 1000;
+    return freqs;
+}
+
+int *calculateDifferences(Peaks *freqs, int diffCount, Fingerprint *sync) {
     int *differences = (int*)calloc(2*diffCount, sizeof(int)); //use as this differences[1000][2] [i][0] is difference [i][1] is count
     //go through each data set of synced track
+    int i;
     for(i=0; i<sync->numPeaks; i++) {
         int j;
 
@@ -129,8 +132,8 @@ int calculateDifference(Fingerprint *original, Fingerprint *sync) {
                         differences[2*c+1]++;
                         break;
                     }
-                    if(differences[2*c] == 0) {
-                        differences[2*c] = freq;
+                    else if(differences[2*c] == 0) {
+                        differences[2*c] = dif;
                         differences[2*c+1] = 1;
                         break;
                     }
@@ -139,21 +142,34 @@ int calculateDifference(Fingerprint *original, Fingerprint *sync) {
             }
         }
     }
+    return differences;
+}
+
+int *calculateDifference(Fingerprint *original, Fingerprint *sync) {
+    //No-one will understand this ever ever.. :D
+    //I will!
+    // TODO Check their configurations to see if they are equal or simliar and maybe convert something?
+
+    Peaks *freqs = calculateFrequencies(original);
+    const int diffCount = 1000;
+    int *differences = calculateDifferences(freqs, diffCount, sync);
     int max = 0;
+    int i;
     for(i=1; i<diffCount; i++) {
         if(differences[2*i+1] > differences[2*max+1])
             max = i;
     }
-    return differences[2*max];
+    return differences;
 
-    free(differences);
     //Free all stuff!
     for(i = 0;i<original->configuration.fftPoints/2+1; i++) {
         if(freqs[i].numPeaks > 0)
             free(freqs[i].peaks); //maybe set peaks to zero?
     }
     free(freqs);
+    int ret = differences[2*max];
     free(differences);
+    //return ret;
 }
 
 

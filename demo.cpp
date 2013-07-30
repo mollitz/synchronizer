@@ -49,7 +49,7 @@ MainWidget::MainWidget(QWidget *parent) :
     mp3Decoder(filename, this)
 {
 
-     configuration.maxNumberPeaks = 4; configuration.fftPoints = framesPerBuffer; configuration.sampleBytes = sampleBytes;
+    configuration.maxNumberPeaks = 8; configuration.fftPoints = framesPerBuffer; configuration.sampleBytes = sampleBytes;
 
     setAxisScale(yLeft, 0, 1);
     setAxisScale(yRight, 0, 1);
@@ -71,15 +71,48 @@ MainWidget::MainWidget(QWidget *parent) :
     while(mp3Decoder.getMonoFrames(framesPerBuffer, buffer) == framesPerBuffer) {
         processSamples(buffer, originalFingerprint);
     }
+    syncFingerprint = initFingerprint(configuration);
+    Mp3Decoder mp3Decoder2(filename, this);
+    int i=0;
+    mp3Decoder2.getMonoFrames(10, buffer);
+    while(mp3Decoder2.getMonoFrames(framesPerBuffer, buffer) == framesPerBuffer) {
+        if(i>920)
+            processSamples(buffer, syncFingerprint);
+        if(i>1120)
+            break;
+        i++;
+    }
+    calculate();
+    freeFingerprint(syncFingerprint);
+    syncFingerprint = NULL;
     qDebug() << "parsed originalFingerprint. go for mic now";
 
 }
 
+void MainWidget::calculate() {
+    int *diffs = calculateDifference(originalFingerprint, syncFingerprint);
+    double *xx = (double*)malloc(sizeof(double)*1000);
+    double *yy = (double*)malloc(sizeof(double)*1000);
+
+    for(int j=0; j<1000; j++) {
+        xx[j] = diffs[2*j];
+        yy[j] = diffs[2*j+1];
+    }
+    curve->setRawSamples(xx,yy,1000);
+    setAxisAutoScale(yLeft);
+    setAxisAutoScale(yRight);
+
+    replot();
+    free(xx);
+    free(yy);
+    free(diffs);
+
+}
 void MainWidget::keyPressEvent(QKeyEvent *keyEvent) {
     if(keyEvent->key() == Qt::Key_E) {
         disconnect(&recorder, SIGNAL(dataAvailable(unsigned char*)), this, SLOT(receiveData(unsigned char*)));
         qDebug() << "startdiff";
-        qDebug() << calculateDifference(originalFingerprint, syncFingerprint);
+        calculate();
         qDebug() << "enddiff";
         freeFingerprint(syncFingerprint);
         syncFingerprint = NULL;

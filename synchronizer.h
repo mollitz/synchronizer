@@ -15,7 +15,7 @@
 /**
   * struct containing information for the fingerprinting
   */
-typedef struct FingerprintConfiguration { 
+typedef struct FingerprintConfiguration {
     //int minNumberPeaks;
     int maxNumberPeaks;
     //float peakQualifier;
@@ -28,7 +28,7 @@ typedef struct FingerprintConfiguration {
   */
 typedef struct Peaks {
     //Number of peaks
-    int *peaks; 
+    int *peaks;
     int numPeaks;
 } Peaks;
 
@@ -61,7 +61,7 @@ void freeFingerprint(Fingerprint *);
 /**
   * \arg buffer The input PCM buffer. Must have apropriate length for given sampleBits and fftPoints (l = sampleBytes*fftPoints)
   * \arg sampleBytes How many bytes per sample
-  * \arg fftPoints The number of fft points 
+  * \arg fftPoints The number of fft points
   * \arg fftBuffer The buffer in which the peaks are safes as indices from 0 to fftPoints
   * \return Return the number of peaks. In this version it is maxNumberPeaks
   */
@@ -72,6 +72,6 @@ void processSamples(unsigned char *buffer, Fingerprint *fingerprint);
   * \arg original The Fingerprint of the original PCM
   * \arg sync The Fingerprint to find the differnce
   */
-int calculateDifference(Fingerprint *original, Fingerprint *sync);
+int *calculateDifference(Fingerprint *original, Fingerprint *sync);
 
 #endif
