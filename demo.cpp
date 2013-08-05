@@ -74,7 +74,7 @@ MainWidget::MainWidget(QWidget *parent) :
     syncFingerprint = initFingerprint(configuration);
     Mp3Decoder mp3Decoder2(filename, this);
     int i=0;
-    mp3Decoder2.getMonoFrames(10, buffer);
+    mp3Decoder2.getMonoFrames(50, buffer);
     while(mp3Decoder2.getMonoFrames(framesPerBuffer, buffer) == framesPerBuffer) {
         if(i>920)
             processSamples(buffer, syncFingerprint);

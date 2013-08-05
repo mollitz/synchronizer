@@ -19,7 +19,7 @@ class MainWidget : public QwtPlot {
     private:
         const char *filename = "/data/Musik/Alben/Brandon Flowers/Flamingo/08 - Crossfire.ogg";
         const int sampleRate = 44100;
-        static const int framesPerBuffer = 512; //Equals to fftPoints
+        static const int framesPerBuffer = 1024; //Equals to fftPoints
         const int sampleBytes = 2;
         double x[framesPerBuffer/2+1], y[framesPerBuffer/2+1];
         unsigned char *buffer;

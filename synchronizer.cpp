@@ -54,7 +54,7 @@ void processSamples(unsigned char *buffer, Fingerprint *fingerprint) {
     //Load values and apply Hann-Windows
     //fingerprint->in[0] = 0.5*(1+cos((2.0/(configuration.fftPoints-1))))*M_PI*((double)((short*)buffer)[0]);
     for(i=0; i<configuration.fftPoints; i++) {
-        fingerprint->in[i] = 0.5*(1-cos((2.0/(configuration.fftPoints-1))))*M_PI*((double)((short*)buffer)[i]);
+        fingerprint->in[i] = 0.5*(1-cos((M_PI*2.0/(configuration.fftPoints-1))))*((double)((short*)buffer)[i]);
         //fingerprint->in[i] = (double)((short*)buffer)[i]; //without windowing..
     }
 
