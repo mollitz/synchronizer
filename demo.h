@@ -17,9 +17,9 @@
 class MainWidget : public QwtPlot {
     Q_OBJECT
     private:
-        const char *filename = "/data/Musik/Alben/Brandon Flowers/Flamingo/08 - Crossfire.ogg";
-        const int sampleRate = 44100;
-        static const int framesPerBuffer = 1024; //Equals to fftPoints
+        const char *filename = "./examplemono32000.wav";
+        const int sampleRate = 32000;
+        static const int framesPerBuffer = 2048; //Equals to fftPoints
         const int sampleBytes = 2;
         double x[framesPerBuffer/2+1], y[framesPerBuffer/2+1];
         unsigned char *buffer;
@@ -27,7 +27,7 @@ class MainWidget : public QwtPlot {
         Fingerprint *syncFingerprint, *originalFingerprint;
         Ringbuffer ringbuffer = Ringbuffer(10, framesPerBuffer*sampleBytes);
         Recorder recorder;
-        Mp3Decoder mp3Decoder;
+        Mp3Decoder mp3Decoder, mp3Decoder3;
         QwtPlotCurve *curve;
         QwtPlotMarker **markers;
         void calculate();
@@ -37,7 +37,8 @@ class MainWidget : public QwtPlot {
     public:
         ~MainWidget();
         public slots:
-            void processData();
+        void processData();
+        void tmpOrig();
         void receiveData(unsigned char*);
         void getDataFromMediaFile();
     public:

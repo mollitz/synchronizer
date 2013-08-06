@@ -22,3 +22,6 @@ int Mp3Decoder::getMonoFrames(int numFrames, void *buffer) {
     }
     return readFrames;
 }
+int Mp3Decoder::getRawFrames(int numFrames, void *buffer) {
+    return sf_readf_short(sfFile, (short*)buffer, numFrames);
+}

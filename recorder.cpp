@@ -1,10 +1,10 @@
 #include "recorder.h"
 #include <QDebug>
 
-Recorder::Recorder(int sampleRate, int framesPerBuffer, int numChannels, QObject *parent) : QObject(parent) { 
+Recorder::Recorder(int sampleRate, int framesPerBuffer, int numChannels, QObject *parent) : QObject(parent) {
     PaError err = paNoError;
-    
-    //Init Buffer. 
+
+    //Init Buffer.
     err = Pa_Initialize();
     if( err != paNoError ) {
         qDebug() << "Error initializing PortAudio\n";
@@ -32,9 +32,9 @@ Recorder::~Recorder() {
     Pa_StopStream(stream);
 }
 
-int Recorder::inputStreamCallback( const void *input, 
-                      void *output, 
-                      unsigned long frameCount, 
+int Recorder::inputStreamCallback( const void *input,
+                      void *output,
+                      unsigned long frameCount,
                       const PaStreamCallbackTimeInfo* timeInfo,
                       PaStreamCallbackFlags statusFlags,
                       void *recorderObject) {

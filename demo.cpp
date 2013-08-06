@@ -41,12 +41,29 @@ void MainWidget::processData() {
         replot();
         qDebug() << "displaying";
     }
-
+}
+void MainWidget::tmpOrig() {
+    mp3Decoder3.getRawFrames(framesPerBuffer, buffer);
+        qDebug() << "got data";
+        processSamples(buffer, syncFingerprint);
+        for(int j=0; j<framesPerBuffer/2+1; j++) {
+            x[j] = j;
+            y[j] = sqrt(pow(syncFingerprint->out[j][0],2)+pow(syncFingerprint->out[j][1],2));
+            curve->setRawSamples(x,y,framesPerBuffer/2+1);
+            Peaks peaks = syncFingerprint->peaks[syncFingerprint->numPeaks-1];
+            for(int i=0; i<peaks.numPeaks; i++) {
+                int xVal = peaks.peaks[i];
+                markers[i]->setValue(xVal, y[xVal]);
+            }
+        }
+        replot();
+        qDebug() << "displaying";
 }
 MainWidget::MainWidget(QWidget *parent) :
     QwtPlot(parent),
     recorder(sampleRate, framesPerBuffer, 1, this),
-    mp3Decoder(filename, this)
+    mp3Decoder(filename, this),
+    mp3Decoder3(filename, this)
 {
 
     configuration.maxNumberPeaks = 8; configuration.fftPoints = framesPerBuffer; configuration.sampleBytes = sampleBytes;
@@ -68,17 +85,17 @@ MainWidget::MainWidget(QWidget *parent) :
     buffer = (unsigned char*)malloc(framesPerBuffer*sampleBytes);
     originalFingerprint = initFingerprint(configuration);
 
-    while(mp3Decoder.getMonoFrames(framesPerBuffer, buffer) == framesPerBuffer) {
+    while(mp3Decoder.getRawFrames(framesPerBuffer, buffer) == framesPerBuffer) {
         processSamples(buffer, originalFingerprint);
     }
     syncFingerprint = initFingerprint(configuration);
     Mp3Decoder mp3Decoder2(filename, this);
     int i=0;
-    mp3Decoder2.getMonoFrames(50, buffer);
-    while(mp3Decoder2.getMonoFrames(framesPerBuffer, buffer) == framesPerBuffer) {
-        if(i>920)
+    mp3Decoder2.getRawFrames(750, buffer);
+    while(mp3Decoder2.getRawFrames(framesPerBuffer, buffer) == framesPerBuffer) {
+        if(i>750)
             processSamples(buffer, syncFingerprint);
-        if(i>1120)
+        if(i>1050)
             break;
         i++;
     }
@@ -117,6 +134,12 @@ void MainWidget::keyPressEvent(QKeyEvent *keyEvent) {
         freeFingerprint(syncFingerprint);
         syncFingerprint = NULL;
     }
+    if(keyEvent->key() == Qt::Key_O) {
+        syncFingerprint = initFingerprint(configuration);
+        QTimer *syncTimer = new QTimer(this);
+        connect(syncTimer, SIGNAL(timeout()), this, SLOT(tmpOrig()));
+        syncTimer->start(1024000.0/16000);
+    }
     if(keyEvent->key() == Qt::Key_S) {
         syncFingerprint = initFingerprint(configuration);
         connect(&recorder, SIGNAL(dataAvailable(unsigned char*)), this, SLOT(receiveData(unsigned char*)));
@@ -133,7 +156,7 @@ void MainWidget::receiveData(unsigned char *buffer) {
 }
 
 void MainWidget::getDataFromMediaFile() {
-    qDebug() << "read Bytes: " << mp3Decoder.getMonoFrames(framesPerBuffer, buffer);
+    qDebug() << "read Bytes: " << mp3Decoder.getRawFrames(framesPerBuffer, buffer);
     if(!ringbuffer.addElement(buffer)) {
         qDebug() << "dumping input due to full buffer";
     }
