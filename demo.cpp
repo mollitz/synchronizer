@@ -44,6 +44,7 @@ void MainWidget::processData() {
 }
 void MainWidget::tmpOrig() {
     mp3Decoder3.getRawFrames(framesPerBuffer, buffer);
+    recorder.setBuffer((short *)buffer, framesPerBuffer*2);
         qDebug() << "got data";
         processSamples(buffer, syncFingerprint);
         for(int j=0; j<framesPerBuffer/2+1; j++) {
@@ -138,7 +139,7 @@ void MainWidget::keyPressEvent(QKeyEvent *keyEvent) {
         syncFingerprint = initFingerprint(configuration);
         QTimer *syncTimer = new QTimer(this);
         connect(syncTimer, SIGNAL(timeout()), this, SLOT(tmpOrig()));
-        syncTimer->start(1024000.0/16000);
+        syncTimer->start((1000.0*framesPerBuffer)/sampleRate);
     }
     if(keyEvent->key() == Qt::Key_S) {
         syncFingerprint = initFingerprint(configuration);

@@ -3,7 +3,6 @@
 
 Recorder::Recorder(int sampleRate, int framesPerBuffer, int numChannels, QObject *parent) : QObject(parent) {
     PaError err = paNoError;
-
     //Init Buffer.
     err = Pa_Initialize();
     if( err != paNoError ) {
@@ -13,7 +12,7 @@ Recorder::Recorder(int sampleRate, int framesPerBuffer, int numChannels, QObject
     //Get default input device:
     err = Pa_OpenDefaultStream(&stream,
             numChannels,
-            0,
+            numChannels,
             paInt16,
             sampleRate,
             framesPerBuffer,
@@ -23,14 +22,32 @@ Recorder::Recorder(int sampleRate, int framesPerBuffer, int numChannels, QObject
     if(err != paNoError) {
         qDebug() << "Couldnt init stream";
     }
-    err = Pa_StartStream(stream);
+    start();
+    outputBuffer = (short *)calloc(framesPerBuffer, 2);
+}
+
+Recorder::~Recorder() {
+    stop();
+    free(outputBuffer);
+}
+
+void Recorder::stop() {
+    Pa_StopStream(stream);
+}
+void Recorder::start() {
+    PaError err = Pa_StartStream(stream);
     if(err != paNoError) {
         qDebug() << "Couldnt start stream";
     }
 }
-Recorder::~Recorder() {
-    Pa_StopStream(stream);
+short *Recorder::getBuffer() {
+    return outputBuffer;
 }
+
+void Recorder::setBuffer(short *buffer, int numBytes) {
+    memcpy(outputBuffer, buffer, numBytes);
+}
+
 
 int Recorder::inputStreamCallback( const void *input,
                       void *output,
@@ -40,6 +57,7 @@ int Recorder::inputStreamCallback( const void *input,
                       void *recorderObject) {
     Recorder *ro = (Recorder*)recorderObject;
     ro->emitDataAvailable((unsigned char*)input);
+    memcpy(output, ro->getBuffer(), frameCount*2);
     return paContinue;
 }
 
