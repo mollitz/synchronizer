@@ -7,7 +7,7 @@ Mp3Decoder::Mp3Decoder(const char *filename, QObject *parent) : QObject(parent) 
     printf("Frames: %d\nSamplerate: %d\nChannels: %d\nFormat: %x\nSections:%d\nSeekable:%d\n", sfInfo.frames, sfInfo.samplerate,sfInfo.channels,sfInfo.format,sfInfo.sections ,sfInfo.seekable);
 }
 Mp3Decoder::~Mp3Decoder() {
-    sf_close(sfFile);
+    close();
 }
 
 void Mp3Decoder::close() {
@@ -24,4 +24,8 @@ int Mp3Decoder::getMonoFrames(int numFrames, void *buffer) {
 }
 int Mp3Decoder::getRawFrames(int numFrames, void *buffer) {
     return sf_readf_short(sfFile, (short*)buffer, numFrames);
+}
+
+void Mp3Decoder::seek(int frame) {
+    sf_seek(sfFile, frame, SEEK_SET);
 }

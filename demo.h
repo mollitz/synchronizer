@@ -21,6 +21,7 @@ class MainWidget : public QwtPlot {
         const int sampleRate = 32000;
         static const int framesPerBuffer = 2048; //Equals to fftPoints
         const int sampleBytes = 2;
+        double index; //save the current position of the song
         double x[framesPerBuffer/2+1], y[framesPerBuffer/2+1];
         unsigned char *buffer;
         FingerprintConfiguration configuration;
@@ -33,6 +34,8 @@ class MainWidget : public QwtPlot {
         void calculate();
     protected:
         virtual void keyPressEvent(QKeyEvent *keyEvent);
+    protected slots:
+        void fillMusicBuffer();
 
     public:
         ~MainWidget();

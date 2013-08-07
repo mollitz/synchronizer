@@ -22,8 +22,8 @@ Recorder::Recorder(int sampleRate, int framesPerBuffer, int numChannels, QObject
     if(err != paNoError) {
         qDebug() << "Couldnt init stream";
     }
-    start();
     outputBuffer = (short *)calloc(framesPerBuffer, 2);
+    start();
 }
 
 Recorder::~Recorder() {

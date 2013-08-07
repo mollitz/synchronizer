@@ -17,6 +17,7 @@ class Mp3Decoder : public QObject {
         /* Saves numFrames frames in buffer. Returns the number of the actual frames read (in case of EOF e.g.) or -1 in case of error. */
         int getMonoFrames(int numFrames, void *buffer);
         int getRawFrames(int numFrames, void *buffer);
+        void seek(int frame);
 };
 
 #endif

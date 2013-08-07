@@ -42,6 +42,10 @@ void MainWidget::processData() {
         qDebug() << "displaying";
     }
 }
+void MainWidget::fillMusicBuffer() {
+    mp3Decoder3.getRawFrames(framesPerBuffer, buffer);
+    recorder.setBuffer((short *)buffer, framesPerBuffer*2);
+}
 void MainWidget::tmpOrig() {
     mp3Decoder3.getRawFrames(framesPerBuffer, buffer);
     recorder.setBuffer((short *)buffer, framesPerBuffer*2);
@@ -89,7 +93,7 @@ MainWidget::MainWidget(QWidget *parent) :
     while(mp3Decoder.getRawFrames(framesPerBuffer, buffer) == framesPerBuffer) {
         processSamples(buffer, originalFingerprint);
     }
-    syncFingerprint = initFingerprint(configuration);
+    /*syncFingerprint = initFingerprint(configuration);
     Mp3Decoder mp3Decoder2(filename, this);
     int i=0;
     mp3Decoder2.getRawFrames(750, buffer);
@@ -103,14 +107,22 @@ MainWidget::MainWidget(QWidget *parent) :
     calculate();
     freeFingerprint(syncFingerprint);
     syncFingerprint = NULL;
-    qDebug() << "parsed originalFingerprint. go for mic now";
+    qDebug() << "parsed originalFingerprint. go for mic now";*/
 
 }
 
 void MainWidget::calculate() {
-    int *diffs = calculateDifference(originalFingerprint, syncFingerprint);
+    int max;
+    int *diffs = calculateDifference(originalFingerprint, syncFingerprint, &max);
     double *xx = (double*)malloc(sizeof(double)*1000);
     double *yy = (double*)malloc(sizeof(double)*1000);
+    qDebug() << "max at " << max << "in seconds: " << max*framesPerBuffer/(float)sampleRate;
+    index = max*(framesPerBuffer/(float)sampleRate);
+    mp3Decoder3.seek((syncFingerprint->numPeaks+max)*framesPerBuffer);
+    QTimer *timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(fillMusicBuffer()));
+    timer->start((1000.0*framesPerBuffer)/sampleRate);
+
 
     for(int j=0; j<1000; j++) {
         xx[j] = diffs[2*j];

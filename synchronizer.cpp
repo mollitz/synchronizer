@@ -145,7 +145,7 @@ int *calculateDifferences(Peaks *freqs, int diffCount, Fingerprint *sync) {
     return differences;
 }
 
-int *calculateDifference(Fingerprint *original, Fingerprint *sync) {
+int *calculateDifference(Fingerprint *original, Fingerprint *sync, int *maxRtn) {
     //No-one will understand this ever ever.. :D
     //I will!
     // TODO Check their configurations to see if they are equal or simliar and maybe convert something?
@@ -159,7 +159,7 @@ int *calculateDifference(Fingerprint *original, Fingerprint *sync) {
         if(differences[2*i+1] > differences[2*max+1])
             max = i;
     }
-    return differences;
+    //return differences;
 
     //Free all stuff!
     for(i = 0;i<original->configuration.fftPoints/2+1; i++) {
@@ -168,7 +168,9 @@ int *calculateDifference(Fingerprint *original, Fingerprint *sync) {
     }
     free(freqs);
     int ret = differences[2*max];
-    free(differences);
+    *maxRtn = ret;
+    //free(differences);
+    return differences;
     //return ret;
 }
 

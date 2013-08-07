@@ -72,6 +72,6 @@ void processSamples(unsigned char *buffer, Fingerprint *fingerprint);
   * \arg original The Fingerprint of the original PCM
   * \arg sync The Fingerprint to find the differnce
   */
-int *calculateDifference(Fingerprint *original, Fingerprint *sync);
+int *calculateDifference(Fingerprint *original, Fingerprint *sync, int *maxRtn);
 
 #endif
