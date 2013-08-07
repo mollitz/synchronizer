@@ -18,6 +18,7 @@ class Mp3Decoder : public QObject {
         int getMonoFrames(int numFrames, void *buffer);
         int getRawFrames(int numFrames, void *buffer);
         void seek(int frame);
+        void seekAdd(int frames);
 };
 
 #endif

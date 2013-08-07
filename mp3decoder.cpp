@@ -29,3 +29,6 @@ int Mp3Decoder::getRawFrames(int numFrames, void *buffer) {
 void Mp3Decoder::seek(int frame) {
     sf_seek(sfFile, frame, SEEK_SET);
 }
+void Mp3Decoder::seekAdd(int frames) {
+    sf_seek(sfFile, frames, SEEK_CUR);
+}
